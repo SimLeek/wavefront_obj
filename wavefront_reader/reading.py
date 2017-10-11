@@ -53,6 +53,8 @@ class Object(object):
         self.vertex_textures = []
         self.faces = []  # type: List[Face]
         self._current_obj_prop = None
+        self.material_name = ''
+        self.material = None  # type: Material
 
         self.misc = []
 
@@ -124,6 +126,8 @@ def read_objfile(fname):
                     obj_file.last_obj_prop.vertex_normals.append([float(val) for val in value.split(' ')])
                 elif prefix == 'vt':
                     obj_file.last_obj_prop.vertex_textures.append([float(val) for val in value.split(' ')])
+                elif prefix == 'usemtl':
+                    obj_file.last_obj_prop.material_name = value
                 elif prefix == 'f':
                     obj_file.last_obj_prop.faces.append(parse_mixed_delim_str(value, obj_file.last_obj_prop))
                 else:
@@ -201,11 +205,12 @@ def read_mtlfile(fname):
 
     return mat_file
 
-
 def read_wavefront(fname_obj):
-    """Returns mesh dictionary along with their material dictionary from a wavefront (.obj and/or .mtl) file."""
+    """Returns mesh class along with their material class from a wavefront (.obj and/or .mtl) file."""
+    obj_file = read_objfile(fname_obj)
+
+    # todo: this assumes only one material library per object file
     fname_mtl = ''
-    geoms = read_objfile(fname_obj)
     for line in open(fname_obj):
         if line.strip():
             prefix, data = line.strip().split(' ', 1)
@@ -214,11 +219,11 @@ def read_wavefront(fname_obj):
                 break
 
     if fname_mtl:
-        materials = read_mtlfile(path.join(path.dirname(fname_obj), fname_mtl))
+        mat_file = read_mtlfile(path.join(path.dirname(fname_obj), fname_mtl))
 
-        for geom in geoms.values():
-            geom['material'] = materials[geom['usemtl']]
+        for obj in obj_file.object_list:
+            obj.material = mat_file.materials[obj.material_name]
 
-    return geoms
+    return obj_file
 
 
