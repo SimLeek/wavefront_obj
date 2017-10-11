@@ -4,17 +4,6 @@ from wavefront_reader import read_wavefront
 from wavefront_reader.reading import Material
 
 
-filepath = path.join(path.split(__file__)[0], '..', 'examples')
-
-filenames = ['untitled.obj',
-             'untitled_with_normals.obj',
-             'untitled_with_normals_and_texcoords.obj',
-             'two_complete_meshes.obj'
-             ]
-
-fnames = [path.join(filepath, name) for name in filenames]
-
-
 class TestWavefrontReader(ut.TestCase):
     def setUp(self):
         self.script_dir = path.dirname(__file__)

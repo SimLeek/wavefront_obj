@@ -18,15 +18,15 @@ class Face(object):
 
     @property
     def vertexes(self):
-        return [self.parent_object.vertexes[v] for v in self.vertex_indices]
+        return [self.parent_object.vertexes[v-1] for v in self.vertex_indices]
 
     @property
     def vertex_normals(self):
-        return [self.parent_object.vertex_normals[v] for v in self.vertex_normal_indices]
+        return [self.parent_object.vertex_normals[v-1] for v in self.vertex_normal_indices]
 
     @property
     def vertex_textures(self):
-        return [self.parent_object.vertex_textures[v] for v in self.vertex_texture_indices]
+        return [self.parent_object.vertex_textures[v-1] for v in self.vertex_texture_indices]
 
 def parse_mixed_delim_str(line, parent_obj):
     """Turns .obj face index string line into [verts, texcoords, normals] numeric tuples."""
@@ -140,11 +140,13 @@ class Material(object):
         self.name = name
         self.Ns = None  # type: float
         self.Ka = None  # type: Tuple(float)
+        self.Ke = None  # type: Tuple(float)
         self.Kd = None  # type: Tuple(float)
         self.Ks = None  # type: Tuple(float)
         self.Ni = None  # type: float
         self.d = None  # type: float
         self.illum = None  # type: int
+        self.map_Kd = ''
 
         self.misc = OrderedDict()  # type: Dict[str, Union[float, Tuple[float]]]
 
@@ -191,12 +193,16 @@ def read_mtlfile(fname):
                     mat_file.last_material.Kd = tuple(float(d) for d in data.split(' '))
                 elif prefix == 'Ks':
                     mat_file.last_material.Ks = tuple(float(d) for d in data.split(' '))
+                elif prefix == 'Ke':
+                    mat_file.last_material.Ke = tuple(float(d) for d in data.split(' '))
                 elif prefix == 'Ni':
                     mat_file.last_material.Ni = float(data)
                 elif prefix == 'd':
                     mat_file.last_material.d = float(data)
                 elif prefix == 'illum':
                     mat_file.last_material.illum = int(data)
+                elif prefix == 'map_Kd':
+                    mat_file.last_material.map_Kd = data
                 else:
                     try:
                         mat_file.last_material.misc[prefix] = int(data)
