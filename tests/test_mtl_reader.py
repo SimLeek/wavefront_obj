@@ -1,44 +1,30 @@
+import unittest as ut
 from os import path
-import pytest
 from wavefront_reader import read_mtlfile
 
-filepath = path.join(path.split(__file__)[0], '..', 'examples')
+class TestObjReader(ut.TestCase):
+    def setUp(self):
+        self.script_dir = path.dirname(__file__)
 
-filenames = ['untitled.mtl',
-             'untitled_with_normals.mtl',
-             'untitled_with_normals_and_texcoords.mtl',
-             'two_complete_meshes.mtl'
-             ]
+    def testFileExists(self):
 
-fnames = [path.join(filepath, name) for name in filenames]
+        try:
+            obj_file = open(self.script_dir + "/wavefronts/untitled.mtl")
+            obj_file.close()
+        except FileNotFoundError as fe:
+            self.fail("Couldn't find file. " + str(fe))
 
+    def test_all_materials_extracted(self):
+        materials = read_mtlfile(self.script_dir + "/wavefronts/untitled.mtl")
+        self.assertTrue(len(materials.material_list) == 1)
 
-@pytest.mark.parametrize("fn", fnames)
-def test_files_exist(fn):
-        assert path.exists(fn)
+        materials = read_mtlfile(self.script_dir + "/wavefronts/two_complete_meshes.mtl")
+        self.assertTrue(len(materials.material_list) == 2)
 
-@pytest.mark.parametrize("fn, count", zip(fnames, [1, 1, 1, 2]))
-def test_all_materials_extracted(fn, count):
-    materials = read_mtlfile(fn)
-    assert len(materials) == count
+    def test_diffuse_values_correct(self):
+        materials = read_mtlfile(self.script_dir + "/wavefronts/untitled.mtl")
+        self.assertTrue(materials.last_material.Kd == (0.64, 0.64, 0.64))
 
-
-@pytest.mark.parametrize("fn, count", zip(fnames, [1, 1, 1, 2]))
-def test_all_materials_extracted(fn, count):
-    materials = read_mtlfile(fn)
-    assert len(materials) == count
-
-@pytest.mark.parametrize("fn, diffuse", zip(fnames, [(0.64, 0.64, 0.64),
-                                                     (0.64, 0.6, 0.64),
-                                                     (0.64, 0.64, 0.64),
-                                                     (0.64, 0.64, 0.24)]))
-def test_diffuse_values_correct(fn, diffuse):
-    materials = read_mtlfile(fn)
-    assert materials['Material']['Kd'] == diffuse
-
-
-@pytest.mark.parametrize("fn, illum", zip(fnames, [2, 2, 2, 3]))
-def test_illum(fn, illum):
-    materials = read_mtlfile(fn)
-    assert materials['Material']['illum'] == illum
-    assert isinstance(materials['Material']['illum'], int)
+    def test_illum(self):
+        materials = read_mtlfile(self.script_dir + "/wavefronts/untitled.mtl")
+        self.assertTrue(materials.last_material.illum == 2)

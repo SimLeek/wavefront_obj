@@ -5,7 +5,7 @@ from six import iteritems
 from os import path
 
 if False:
-    from typing import List, Dict
+    from typing import List, Dict, Tuple, Union
 
 class Face(object):
     def __init__(self,
@@ -131,12 +131,45 @@ def read_objfile(fname):
 
     return obj_file
 
+class Material(object):
+    def __init__(self, name):
+        self.name = name
+        self.Ns = None  # type: float
+        self.Ka = None  # type: Tuple(float)
+        self.Kd = None  # type: Tuple(float)
+        self.Ks = None  # type: Tuple(float)
+        self.Ni = None  # type: float
+        self.d = None  # type: float
+        self.illum = None  # type: int
+
+        self.misc = OrderedDict()  # type: Dict[str, Union[float, Tuple[float]]]
+
 class MaterialFile(object):
     def __init__(self):
-        pass
+        self.materials = OrderedDict()  # type: Dict[str, Material]
+
+    @property
+    def material_list(self):
+        return [x[1] for x in self.materials.items()]
+
+    @property
+    def material_dict(self):
+        return self.materials
+
+    @property
+    def last_material(self):
+        return self.material_list[-1] if len(self.material_list)>0 else None
+
+    def has_materials(self):
+        return self.last_material is not None
+
+
+    def add_material(self, name):
+        self.materials[name] = Material(name)
 
 def read_mtlfile(fname):
-    materials = {}
+    mat_file = MaterialFile()
+
     with open(fname) as f:
         lines = f.read().splitlines()
 
@@ -144,18 +177,29 @@ def read_mtlfile(fname):
         if line:
             prefix, data = line.split(' ', 1)
             if 'newmtl' in prefix:
-                material = {}
-                materials[data] = material
-            elif materials:
-                if len(data.split(' ')) > 1:
-                    material[prefix] = tuple(float(d) for d in data.split(' '))
+                mat_file.add_material(data)
+            elif mat_file.has_materials():
+                if prefix == 'Ns':
+                    mat_file.last_material.Ns = float(data)
+                elif prefix == 'Ka':
+                    mat_file.last_material.Ka = tuple(float(d) for d in data.split(' '))
+                elif prefix == 'Kd':
+                    mat_file.last_material.Kd = tuple(float(d) for d in data.split(' '))
+                elif prefix == 'Ks':
+                    mat_file.last_material.Ks = tuple(float(d) for d in data.split(' '))
+                elif prefix == 'Ni':
+                    mat_file.last_material.Ni = float(data)
+                elif prefix == 'd':
+                    mat_file.last_material.d = float(data)
+                elif prefix == 'illum':
+                    mat_file.last_material.illum = int(data)
                 else:
                     try:
-                        material[prefix] = int(data)
+                        mat_file.last_material.misc[prefix] = int(data)
                     except ValueError:
-                        material[prefix] = float(data)
+                        mat_file.last_material.misc[prefix] = float(data)
 
-    return materials
+    return mat_file
 
 
 def read_wavefront(fname_obj):
