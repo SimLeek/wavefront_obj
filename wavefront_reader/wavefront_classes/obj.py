@@ -33,7 +33,7 @@ class Obj(object):
     def has_vertex_textures(self):
         return len(self.vertex_textures) > 0
 
-    def get_vao_data_triangles(self):
+    def get_vbo_data_triangles(self):
         gl_array = []
 
         single_gl_vertex_len = 4

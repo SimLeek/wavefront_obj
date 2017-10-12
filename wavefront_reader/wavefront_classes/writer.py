@@ -1,3 +1,5 @@
+raise NotImplementedError
+
 from wavefront_reader import __version__ as wavefront_reader_version
 from sys import version as python_version
 
