@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def grouper(n, iterable):
     "grouper(3, 'abcdefg', 'x') --> ('a','b','c'), ('d','e','f'), ('g','x','x')"
     return zip(*[iter(iterable)]*n)
@@ -36,13 +37,6 @@ def fan_triangulate(indices):
 
 
 class WavefrontWriter(object):
-
-    preamble = "# Blender v2.69 (sub 5) OBJ File: ''\n" + "# www.blender.org\n"
-
-    def __init__(self, string):
-        self._data = self.preamble + string
-
-
     @classmethod
     def from_dicts(cls, mesh_name, vert_dict, normal_dict):
         """Returns a wavefront .obj string using pre-triangulated vertex dict and normal dict as reference."""

@@ -1,7 +1,7 @@
 from os import path
 import unittest as ut
 from wavefront_reader import read_wavefront
-from wavefront_reader.reading import Material
+from wavefront_reader.wavefront_classes import Mtl
 
 
 class TestWavefrontReader(ut.TestCase):
@@ -19,5 +19,5 @@ class TestWavefrontReader(ut.TestCase):
         obj_2 = read_wavefront(self.script_dir + "/wavefronts/two_complete_meshes.obj")
         for geom in obj_1.object_list:
             self.assertTrue(geom.material_name != '')
-            self.assertTrue(isinstance(geom.material, Material))
+            self.assertTrue(isinstance(geom.material, Mtl))
             self.assertTrue(geom.material.Kd is not None)

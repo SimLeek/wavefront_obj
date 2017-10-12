@@ -21,7 +21,7 @@ class TestObjReader(ut.TestCase):
     def testHasVertices(self):
         obj_file = read_objfile(self.script_dir + "/wavefronts/untitled.obj")
         cube = obj_file['Cube']
-        self.assertTrue(len(cube.vertexes) > 0)
+        self.assertTrue(len(cube.vertices) > 0)
 
     def test_has_normals(self):
         geoms = read_objfile(self.script_dir + "/wavefronts/untitled_with_normals.obj")
